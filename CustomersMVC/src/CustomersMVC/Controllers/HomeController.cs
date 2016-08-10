@@ -28,21 +28,21 @@ namespace CustomersMVC.Controllers
             return View(customersList);
         }
 
-        [Route("[Controller]/[Action]")]
-        public async Task<IActionResult> AddCustomer()
+        public IActionResult AddCustomer()
         {
-            var customer = new CustomerEntity
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddCustomer(CustomerEntity customer)
+        {
+            if (ModelState.IsValid)
             {
-                Id = Guid.NewGuid(),
-                FirstName = "Jon",
-                LastName = "Smith",
-                PhoneNumber = "555-555-5555"
-            };
+                await _customersService.AddCustomerAsync(customer);
+                return RedirectToAction("CustomersList");
+            }
 
-            await _customersService.AddCustomerAsync(customer);
-
-            var customersList = await _customersService.GetCustomersListAsync();
-            return View("CustomersList", customersList);
+            return View(customer);
         }
 
         [Route("[Controller]/[Action]/{customerId}")]
@@ -50,8 +50,7 @@ namespace CustomersMVC.Controllers
         {
             await _customersService.DeleteCustomerAsync(customerId);
 
-            var customersList = await _customersService.GetCustomersListAsync();
-            return View("CustomersList", customersList);
+            return RedirectToAction("CustomersList");
         }
     }
 }
